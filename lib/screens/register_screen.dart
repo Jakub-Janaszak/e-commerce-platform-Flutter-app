@@ -2,12 +2,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:project_shop/screens/login_screen.dart';
-import 'package:project_shop/services/firestore.dart';
+import 'package:project_shop/services/account_firestore.dart';
 
 void _navigateToLoginScreen(BuildContext context) {
   Navigator.of(context)
       .pop(MaterialPageRoute(builder: (context) => LoginScreen()));
 }
+
+
 
 class RegisterScreen extends StatefulWidget {
   RegisterScreen({super.key});

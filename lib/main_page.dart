@@ -5,29 +5,38 @@ import 'package:project_shop/screens/single_announcement_screen.dart';
 import 'package:project_shop/screens/login_screen.dart';
 import 'package:project_shop/screens/register_screen.dart';
 import 'package:project_shop/screens/account_screen.dart';
+import 'package:project_shop/screens/create_announcement_screen.dart';
 import 'package:project_shop/main_page.dart';
 
 class MainPage extends StatefulWidget {
+  final String login;
+  MainPage({required this.login});
+
   @override
   _MainPageState createState() => _MainPageState();
 }
 
 class _MainPageState extends State<MainPage> {
   int index = 0;
+  late List<Widget> screens;
 
-  final screens = [
-    AnnouncementsScreen(),
-    SingleAnnouncementScreen(),
-    RegisterScreen(),
-    AccountScreen()
-  ];
+  @override
+  void initState() {
+    super.initState();
+    screens = [
+      AnnouncementsScreen(), //login: widget.login),
+      CreateAnnouncementScreen(login: widget.login),
+      //AnnouncementsScreen(),
+      AccountScreen(login: widget.login)
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
     final itemsNavicationBar = <Widget>[
       const Icon(Icons.home, size: 30),
       const Icon(Icons.add, size: 30),
-      const Icon(Icons.favorite, size: 30),
+      //const Icon(Icons.favorite, size: 30),
       const Icon(Icons.person, size: 30)
     ];
 

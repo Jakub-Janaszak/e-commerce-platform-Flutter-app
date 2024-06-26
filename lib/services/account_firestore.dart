@@ -16,13 +16,12 @@ class AccountService {
   //Create
   Future<String?> addAccount(
       String login, String email, String password) async {
-    // Sprawdzenie istnienia loginu
-    DocumentSnapshot loginSnapshot = await accounts.doc(login).get();
-
     if (login.isEmpty || email.isEmpty || password.isEmpty) {
       return 'Enter all data.';
     }
 
+    // Sprawdzenie istnienia loginu
+    DocumentSnapshot loginSnapshot = await accounts.doc(login).get();
     if (loginSnapshot.exists) {
       return 'Login already exists';
     }
@@ -45,40 +44,19 @@ class AccountService {
   }
 
   Future<LoginResult> login(String login, String password) async {
-    // Sprawdzenie istnienia loginu
-    
-    var loginUser = await accounts
-        .where('login', isEqualTo: login)
-        .where('password', isEqualTo: password).get();
-
     if (login.isEmpty || password.isEmpty) {
       return LoginResult('Enter all data.', false);
     }
 
-    if (loginUser.docs(login).) {
-      return 'Login already exists';
-    }
+    var loginUser = await accounts
+        .where('login', isEqualTo: login)
+        .where('password', isEqualTo: password)
+        .get();
 
-    // Sprawdzenie istnienia e-maila
-    QuerySnapshot emailSnapshot =
-        await accounts.where('email', isEqualTo: email).get();
-    if (emailSnapshot.docs.isNotEmpty) {
-      return 'Email already exists';
+    if (loginUser.docs.isNotEmpty) {
+      return LoginResult('Login successful', true);
+    } else {
+      return LoginResult('Invalid login or password', false);
     }
-
-    // Dodanie nowego konta
-    await accounts.doc(login).set({
-      'login': login,
-      'email': email,
-      'password': password,
-      'timestamp': Timestamp.now()
-    });
-    return null;
   }
-
-  //Read
-
-  //Update
-
-  //Delete
 }

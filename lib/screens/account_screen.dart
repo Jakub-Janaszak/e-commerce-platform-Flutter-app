@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:project_shop/screens/single_announcement_screen.dart';
 
-String name = 'Kubjana';
-String password = 'Kuba123';
+String word = '';
 
 class AccountScreen extends StatelessWidget {
-  AccountScreen({super.key});
+  final String login;
+  AccountScreen({required this.login});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +25,7 @@ class AccountScreen extends StatelessWidget {
               size: screenWidth / 2,
             ),
             Text(
-              '$name',
+              '$login',
               textAlign: TextAlign.right,
               style: GoogleFonts.lato(
                 color: Color.fromARGB(255, 0, 0, 0),
@@ -33,7 +34,7 @@ class AccountScreen extends StatelessWidget {
               ),
             ),
             Text(
-              '$password',
+              '$word',
               textAlign: TextAlign.right,
               style: GoogleFonts.lato(
                 color: Color.fromARGB(255, 0, 0, 0),

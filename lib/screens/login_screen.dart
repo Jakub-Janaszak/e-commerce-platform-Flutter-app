@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:project_shop/screens/register_screen.dart';
+import 'package:project_shop/services/account_firestore.dart';
+import 'package:project_shop/main_page.dart';
 
 const startAlignment = Alignment.topLeft;
 const endAlignment = Alignment.bottomRight;
@@ -8,12 +10,32 @@ const endAlignment = Alignment.bottomRight;
 TextEditingController loginController = TextEditingController();
 TextEditingController passwordController = TextEditingController();
 
+String errorMessage = "";
+
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
   void _navigateToRegisterScreen(BuildContext context) {
     Navigator.of(context)
         .push(MaterialPageRoute(builder: (context) => RegisterScreen()));
+  }
+
+  void _navigateToMainPage(BuildContext context, String login) {
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (context) => MainPage(login: login)));
+  }
+
+  void attemptLogin(String login, String password, BuildContext context) async {
+    AccountService accountService = AccountService();
+    LoginResult result = await accountService.login(login, password);
+
+    if (result.success) {
+      print(result.message);
+      _navigateToMainPage(context, login);
+    } else {
+      errorMessage = result.message;
+      print(result.message);
+    }
   }
 
   @override
@@ -91,11 +113,11 @@ class LoginScreen extends StatelessWidget {
               ),
               child: TextButton(
                 onPressed: () {
+                  attemptLogin(
+                      loginController.text, passwordController.text, context);
+
                   // Dodaj tutaj logikę dla przycisku
-                  print("l: " +
-                      loginController.text +
-                      "   p: " +
-                      passwordController.text);
+                  //print("l: " +loginController.text + "   p: " + passwordController.text);
                 },
                 child: const Text(
                   'Log in',
@@ -103,6 +125,7 @@ class LoginScreen extends StatelessWidget {
                 ),
               ),
             ),
+            Text(errorMessage, style: TextStyle(color: Colors.red)),
             Container(
               width: screenWidth / 1.5,
               child: TextButton(

@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-String name = "Iphone 13 i słuchawki";
-double prize = 40001.1;
-String location = "Gliwice";
-
 class AnnouncementView extends StatelessWidget {
-  AnnouncementView({super.key});
-
-  String prizeString = prize.toStringAsFixed(2);
+  String title;
+  double prize;
+  String location;
+  String prizeString;
+  String imageURL;
+  AnnouncementView(
+      {required this.title,
+      required this.prize,
+      required this.location,
+      required this.imageURL})
+      : prizeString = prize.toStringAsFixed(2);
 
   @override
   Widget build(BuildContext context) {
@@ -28,15 +32,17 @@ class AnnouncementView extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(10.0),
             child: AspectRatio(
-              aspectRatio: 1.0,
-              child: Image.asset(
+                aspectRatio: 1.0,
+                child: Image.network(imageURL,
+                    fit: BoxFit
+                        .cover) /*Image.asset(
                 'assets/images/iphone.jpg',
                 fit: BoxFit.cover,
-              ),
-            ),
+              ), */
+                ),
           ),
           Text(
-            '$name',
+            '$title',
             textAlign: TextAlign.left,
             overflow: TextOverflow.ellipsis,
             maxLines: 2,
