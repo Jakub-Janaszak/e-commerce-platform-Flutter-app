@@ -1,18 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:project_shop/services/announcement_firestore.dart';
 
 class AnnouncementView extends StatelessWidget {
-  String title;
-  double prize;
-  String location;
+  Announcement announcement;
   String prizeString;
-  String imageURL;
   AnnouncementView(
-      {required this.title,
-      required this.prize,
-      required this.location,
-      required this.imageURL})
-      : prizeString = prize.toStringAsFixed(2);
+      {required this.announcement})
+      : prizeString = announcement.prize.toStringAsFixed(2);
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +28,7 @@ class AnnouncementView extends StatelessWidget {
             borderRadius: BorderRadius.circular(10.0),
             child: AspectRatio(
                 aspectRatio: 1.0,
-                child: Image.network(imageURL,
+                child: Image.network(announcement.imageUrl,
                     fit: BoxFit
                         .cover) /*Image.asset(
                 'assets/images/iphone.jpg',
@@ -42,7 +37,7 @@ class AnnouncementView extends StatelessWidget {
                 ),
           ),
           Text(
-            '$title',
+            announcement.title,
             textAlign: TextAlign.left,
             overflow: TextOverflow.ellipsis,
             maxLines: 2,
@@ -58,7 +53,7 @@ class AnnouncementView extends StatelessWidget {
                 size: 14,
               ),
               Text(
-                '$location',
+                announcement.location,
                 style: GoogleFonts.lato(
                   color: Color.fromARGB(255, 0, 0, 0),
                   fontSize: 14,

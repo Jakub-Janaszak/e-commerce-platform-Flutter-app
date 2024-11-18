@@ -6,15 +6,11 @@ import 'package:project_shop/services/announcement_firestore.dart';
 class AnnouncementsScreen extends StatefulWidget {
   AnnouncementsScreen({super.key});
 
-  void _navigateToMainPage(BuildContext context, String title, double prize,
-      String location, String description, String imageURL) {
+  void _navigateToMainPage(BuildContext context, Announcement announcement) {
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => SingleAnnouncementScreen(
-            title: title,
-            prize: prize,
-            location: location,
-            description: description,
-            imageURL: imageURL)));
+              announcement: announcement,
+            )));
   }
 
   @override
@@ -41,7 +37,7 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
     loadAnnouncements();
   }
 
-  void filterAnnouncements(String query) { 
+  void filterAnnouncements(String query) {
     query = query.toLowerCase();
     setState(() {
       filteredAnnouncements = announcements.where((announcement) {
@@ -83,37 +79,19 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
                 GestureDetector(
                   onTap: () {
                     widget._navigateToMainPage(
-                        context,
-                        filteredAnnouncements[i].title,
-                        filteredAnnouncements[i].prize,
-                        filteredAnnouncements[i].location,
-                        filteredAnnouncements[i].description,
-                        filteredAnnouncements[i].imageUrl);
+                        context, filteredAnnouncements[i]);
                   },
-                  child: AnnouncementView(
-                    title: filteredAnnouncements[i].title,
-                    prize: filteredAnnouncements[i].prize,
-                    location: filteredAnnouncements[i].location,
-                    imageURL: filteredAnnouncements[i].imageUrl,
-                  ),
+                  child:
+                      AnnouncementView(announcement: filteredAnnouncements[i]),
                 ),
                 if (i + 1 < filteredAnnouncements.length)
                   GestureDetector(
                     onTap: () {
                       widget._navigateToMainPage(
-                          context,
-                          filteredAnnouncements[i + 1].title,
-                          filteredAnnouncements[i + 1].prize,
-                          filteredAnnouncements[i + 1].location,
-                          filteredAnnouncements[i + 1].description,
-                          filteredAnnouncements[i + 1].imageUrl);
+                          context, filteredAnnouncements[i + 1]);
                     },
                     child: AnnouncementView(
-                      title: filteredAnnouncements[i + 1].title,
-                      prize: filteredAnnouncements[i + 1].prize,
-                      location: filteredAnnouncements[i + 1].location,
-                      imageURL: filteredAnnouncements[i + 1].imageUrl,
-                    ),
+                        announcement: filteredAnnouncements[i + 1]),
                   )
               ]),
             SizedBox(

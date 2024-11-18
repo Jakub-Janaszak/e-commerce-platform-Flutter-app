@@ -8,7 +8,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 
 class Announcement {
-  final String id; // Dodaj pole ID
+  final String id;
   final String title;
   final double prize;
   final String location;
