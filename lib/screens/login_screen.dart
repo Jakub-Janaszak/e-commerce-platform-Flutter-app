@@ -20,18 +20,20 @@ class LoginScreen extends StatelessWidget {
         .push(MaterialPageRoute(builder: (context) => RegisterScreen()));
   }
 
-  void _navigateToMainPage(BuildContext context, String login) {
-    Navigator.of(context)
-        .push(MaterialPageRoute(builder: (context) => MainPage(login: login)));
+  void _navigateToMainPage(BuildContext context, Account account) {
+    Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => MainPage(account: account)));
   }
 
   void attemptLogin(String login, String password, BuildContext context) async {
     AccountService accountService = AccountService();
     LoginResult result = await accountService.login(login, password);
 
+    Account? account = await accountService.getAccountByLogin(login);
+
     if (result.success) {
       print(result.message);
-      _navigateToMainPage(context, login);
+      _navigateToMainPage(context, account!);
     } else {
       errorMessage = result.message;
       print(result.message);

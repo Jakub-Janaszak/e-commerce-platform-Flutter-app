@@ -7,10 +7,11 @@ import 'package:project_shop/screens/register_screen.dart';
 import 'package:project_shop/screens/account_screen.dart';
 import 'package:project_shop/screens/create_announcement_screen.dart';
 import 'package:project_shop/main_page.dart';
+import 'package:project_shop/services/account_firestore.dart';
 
 class MainPage extends StatefulWidget {
-  final String login;
-  MainPage({required this.login});
+  final Account account;
+  MainPage({required this.account});
 
   @override
   _MainPageState createState() => _MainPageState();
@@ -25,9 +26,9 @@ class _MainPageState extends State<MainPage> {
     super.initState();
     screens = [
       AnnouncementsScreen(), //login: widget.login),
-      CreateAnnouncementScreen(login: widget.login),
+      CreateAnnouncementScreen(account: widget.account),
       //AnnouncementsScreen(),
-      AccountScreen(login: widget.login)
+      AccountScreen(account: widget.account)
     ];
   }
 

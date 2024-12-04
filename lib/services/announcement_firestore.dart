@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:project_shop/services/account_firestore.dart';
 
 class Announcement {
   final String id;
@@ -15,6 +16,8 @@ class Announcement {
   final String description;
   final String imageUrl;
   final Timestamp timestamp;
+  final String owner;
+  final int views;
 
   Announcement({
     required this.id,
@@ -24,19 +27,38 @@ class Announcement {
     required this.description,
     required this.imageUrl,
     required this.timestamp,
+    required this.owner,
+    required this.views,
   });
 
+  // Factory method - mapowanie z Firestore do obiektu Announcement
   factory Announcement.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data() as Map;
     return Announcement(
-      id: doc.id, // Przypisz ID dokumentu
+      id: doc.id,
       title: data['title'] ?? '',
       prize: data['prize']?.toDouble() ?? 0.0,
       location: data['location'] ?? '',
       description: data['description'] ?? '',
       imageUrl: data['image'] ?? '',
       timestamp: data['timestamp'] ?? Timestamp.now(),
+      owner: data['owner'] ?? '',
+      views: data['views'] ?? 0,
     );
+  }
+
+  // ToMap - konwertowanie obiektu Announcement na Map
+  Map<String, dynamic> toMap() {
+    return {
+      'title': title,
+      'prize': prize,
+      'location': location,
+      'image': imageUrl,
+      'description': description,
+      'owner': owner,
+      'timestamp': timestamp,
+      'views': views,
+    };
   }
 }
 
@@ -54,17 +76,15 @@ class AnnouncementService {
     Reference referenceDirImages = referenceRoot.child('images');
 
     Reference referenceImageToUpload = referenceDirImages.child(uniqueFileName);
-    
+
     try {
       //store the file
       await referenceImageToUpload.putFile(File(file!.path));
 
       imageUrl = await referenceImageToUpload.getDownloadURL();
-      
     } catch (error) {
       print(error);
     }
-    
   }
 
   //get collection
@@ -73,7 +93,7 @@ class AnnouncementService {
 
   //Create
   Future<String?> addAnnouncement(String title, double prize, String location,
-      String description, String login) async {
+      String description, Account account) async {
     if (title.isEmpty ||
         prize == null ||
         location.isEmpty ||
@@ -81,17 +101,56 @@ class AnnouncementService {
       return 'Enter all data.';
     }
 
-    // Dodanie nowego konta
-    await announcements.doc().set({
-      'title': title,
-      'prize': prize,
-      'location': location,
-      'image': imageUrl,
-      'description': description,
-      'owner': login,
-      'timestamp': Timestamp.now()
-    });
+    // Tworzymy obiekt Announcement i mapujemy go na Map
+    Announcement newAnnouncement = Announcement(
+      id: '',
+      title: title,
+      prize: prize,
+      location: location,
+      description: description,
+      imageUrl: imageUrl,
+      timestamp: Timestamp.now(),
+      owner: account.id,
+      views: 0,
+    );
+
+    // Zapisujemy do Firestore używając mapy z metody toMap
+    await announcements.add(newAnnouncement.toMap());
     return null;
+  }
+
+  // Update an existing announcement
+  Future<String?> updateAnnouncement(
+    String announcementId, {
+    String? title,
+    double? prize,
+    String? location,
+    String? description,
+  }) async {
+    try {
+      Map<String, dynamic> updates = {};
+
+      // Dodajemy do mapy tylko te pola, które mają nowe wartości
+      if (title != null && title.isNotEmpty) updates['title'] = title;
+      if (prize != null) updates['prize'] = prize;
+      if (location != null && location.isNotEmpty)
+        updates['location'] = location;
+      if (description != null && description.isNotEmpty)
+        updates['description'] = description;
+      if (!imageUrl.isEmpty) updates['image'] = imageUrl;
+
+      if (updates.isEmpty) {
+        return 'No updates provided';
+      }
+
+      // Aktualizacja ogłoszenia w Firestore
+      await announcements.doc(announcementId).update(updates);
+
+      return null; // Sukces, brak błędu
+    } catch (e) {
+      print("Error updating announcement: $e");
+      return 'Error updating announcement';
+    }
   }
 
   // Get all announcements
@@ -100,6 +159,23 @@ class AnnouncementService {
     return querySnapshot.docs
         .map((doc) => Announcement.fromFirestore(doc))
         .toList();
+  }
+
+  // Get all announcements of passed owner
+  Future<List<Announcement>> getAllAnnouncementsByOwnerId(
+      String ownerId) async {
+    try {
+      QuerySnapshot querySnapshot = await announcements
+          .where('owner', isEqualTo: ownerId) // Filtrowanie ogłoszeń po ownerId
+          .get();
+
+      return querySnapshot.docs
+          .map((doc) => Announcement.fromFirestore(doc))
+          .toList();
+    } catch (e) {
+      print("Error fetching announcements by owner ID: $e");
+      return [];
+    }
   }
 
   Future<Announcement?> getAnnouncementByID(String announcementId) async {
@@ -118,6 +194,21 @@ class AnnouncementService {
     } catch (e) {
       print("Error getting document: $e");
       return null;
+    }
+  }
+
+  // Zwiększenie liczby oglądających
+  Future<void> incrementViews(String announcementId) async {
+    try {
+      // Pobranie dokumentu ogłoszenia
+      DocumentReference announcementRef = announcements.doc(announcementId);
+
+      // Zwiększenie pola 'views' o 1
+      await announcementRef.update({
+        'views': FieldValue.increment(1),
+      });
+    } catch (e) {
+      print("Error incrementing views: $e");
     }
   }
 }

@@ -1,5 +1,42 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
+
+class Account {
+  final String id;
+  final String login;
+  final String email;
+  final String password;
+  final Timestamp timestamp;
+
+  Account({
+    required this.id,
+    required this.login,
+    required this.email,
+    required this.password,
+    required this.timestamp,
+  });
+
+  // Tworzenie obiektu z mapy (np. z Firestore)
+  factory Account.fromFirestore(DocumentSnapshot doc) {
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    return Account(
+      id: doc.id, // Pobranie ID z dokumentu
+      login: data['login'] ?? '',
+      email: data['email'] ?? '',
+      password: data['password'] ?? '',
+      timestamp: data['timestamp'] ?? Timestamp.now(),
+    );
+  }
+
+  // Zamiana obiektu na mapę (np. przy dodawaniu do Firestore)
+  Map<String, dynamic> toMap() {
+    return {
+      'login': login,
+      'email': email,
+      'password': password,
+      'timestamp': timestamp,
+    };
+  }
+}
 
 class LoginResult {
   final String message;
@@ -9,11 +46,11 @@ class LoginResult {
 }
 
 class AccountService {
-  //get collection
+  // Kolekcja
   final CollectionReference accounts =
       FirebaseFirestore.instance.collection('accounts');
 
-  //Create
+  // Dodawanie konta
   Future<String?> addAccount(
       String login, String email, String password) async {
     if (login.isEmpty || email.isEmpty || password.isEmpty) {
@@ -21,8 +58,9 @@ class AccountService {
     }
 
     // Sprawdzenie istnienia loginu
-    DocumentSnapshot loginSnapshot = await accounts.doc(login).get();
-    if (loginSnapshot.exists) {
+    QuerySnapshot loginSnapshot =
+        await accounts.where('login', isEqualTo: login).get();
+    if (loginSnapshot.docs.isNotEmpty) {
       return 'Login already exists';
     }
 
@@ -33,22 +71,29 @@ class AccountService {
       return 'Email already exists';
     }
 
+    // Generowanie unikalnego ID
+    String id = accounts.doc().id;
+
     // Dodanie nowego konta
-    await accounts.doc(login).set({
-      'login': login,
-      'email': email,
-      'password': password,
-      'timestamp': Timestamp.now()
-    });
+    Account newAccount = Account(
+      id: id,
+      login: login,
+      email: email,
+      password: password,
+      timestamp: Timestamp.now(),
+    );
+
+    await accounts.doc(id).set(newAccount.toMap());
     return null;
   }
 
+  // Logowanie
   Future<LoginResult> login(String login, String password) async {
     if (login.isEmpty || password.isEmpty) {
       return LoginResult('Enter all data.', false);
     }
 
-    var loginUser = await accounts
+    QuerySnapshot loginUser = await accounts
         .where('login', isEqualTo: login)
         .where('password', isEqualTo: password)
         .get();
@@ -57,6 +102,40 @@ class AccountService {
       return LoginResult('Login successful', true);
     } else {
       return LoginResult('Invalid login or password', false);
+    }
+  }
+
+  // Pobieranie konta po ID
+  Future<Account?> getAccountById(String id) async {
+    try {
+      DocumentSnapshot doc = await accounts.doc(id).get();
+      if (doc.exists) {
+        return Account.fromFirestore(doc);
+      }
+      return null;
+    } catch (e) {
+      print('Error getting account: $e');
+      return null;
+    }
+  }
+
+  // Pobieranie konta po loginie
+  Future<Account?> getAccountByLogin(String login) async {
+    try {
+      // Wyszukiwanie konta po loginie
+      QuerySnapshot querySnapshot =
+          await accounts.where('login', isEqualTo: login).get();
+
+      // Jeśli znaleziono dokumenty
+      if (querySnapshot.docs.isNotEmpty) {
+        // Zwrócenie pierwszego dokumentu (zakładając, że login jest unikalny)
+        DocumentSnapshot doc = querySnapshot.docs.first;
+        return Account.fromFirestore(doc); // Zwracamy obiekt Account
+      }
+      return null; // Jeśli nie znaleziono, zwróć null
+    } catch (e) {
+      print('Error getting account by login: $e');
+      return null;
     }
   }
 }

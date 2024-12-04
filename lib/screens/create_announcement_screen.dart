@@ -23,12 +23,12 @@ void _addImage() async {
   XFile? file = await imagePicker.pickImage(source: ImageSource.gallery);
   print('${file?.path}');
 
-  announcementService.addImage(file);//.then((_) { isImageReady = true; });
+  announcementService.addImage(file); //.then((_) { isImageReady = true; });
 }
 
 class CreateAnnouncementScreen extends StatefulWidget {
-  final String login;
-  CreateAnnouncementScreen({required this.login});
+  final Account account;
+  CreateAnnouncementScreen({required this.account});
 
   @override
   State<CreateAnnouncementScreen> createState() =>
@@ -39,9 +39,9 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
   String message = '';
 
   void _makeAnnouncement(String title, double prize, String location,
-      String description, String login) {
+      String description, Account account) {
     announcementService
-        .addAnnouncement(title, prize, location, description, login)
+        .addAnnouncement(title, prize, location, description, account)
         .then((result) {
       setState(() {
         if (result != null) {
@@ -70,7 +70,7 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Text(
-              'Add announcement',
+              'Add listing',
               textAlign: TextAlign.left,
               overflow: TextOverflow.ellipsis,
               maxLines: 2,
@@ -167,7 +167,7 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
                             prize,
                             locationController.text,
                             descriptionController.text,
-                            widget.login);
+                            widget.account);
                       },
                       icon: Icon(
                         Icons.arrow_circle_right_outlined,
