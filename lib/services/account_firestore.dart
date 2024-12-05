@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:project_shop/services/encryption_service';
 
 class Account {
   final String id;
@@ -17,7 +18,7 @@ class Account {
 
   // Tworzenie obiektu z mapy (np. z Firestore)
   factory Account.fromFirestore(DocumentSnapshot doc) {
-    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    Map<String, dynamic> data = (doc.data() as Map<String, dynamic>? ?? {});
     return Account(
       id: doc.id, // Pobranie ID z dokumentu
       login: data['login'] ?? '',
@@ -50,6 +51,9 @@ class AccountService {
   final CollectionReference accounts =
       FirebaseFirestore.instance.collection('accounts');
 
+  final String encryptionKey = "SecureEncryptionKey-happy-573410";
+  final String iv = "IV-ok-7845172345";
+
   // Dodawanie konta
   Future<String?> addAccount(
       String login, String email, String password) async {
@@ -74,12 +78,16 @@ class AccountService {
     // Generowanie unikalnego ID
     String id = accounts.doc().id;
 
+    // Szyfrowanie hasła przed zapisaniem
+    EncryptionService encryptionService = EncryptionService(encryptionKey, iv);
+    String encryptedPassword = encryptionService.encrypt(password);
+
     // Dodanie nowego konta
     Account newAccount = Account(
       id: id,
       login: login,
       email: email,
-      password: password,
+      password: encryptedPassword,
       timestamp: Timestamp.now(),
     );
 
@@ -93,13 +101,26 @@ class AccountService {
       return LoginResult('Enter all data.', false);
     }
 
-    QuerySnapshot loginUser = await accounts
-        .where('login', isEqualTo: login)
-        .where('password', isEqualTo: password)
-        .get();
+    QuerySnapshot loginUser =
+        await accounts.where('login', isEqualTo: login).get();
 
     if (loginUser.docs.isNotEmpty) {
-      return LoginResult('Login successful', true);
+      DocumentSnapshot userDoc = loginUser.docs.first;
+
+      // Pobranie zaszyfrowanego hasła z Firestore
+      String encryptedPassword = userDoc['password'];
+
+      // Deszyfrowanie hasła przed porównaniem
+      EncryptionService encryptionService =
+          EncryptionService(encryptionKey, iv);
+      String decryptedPassword = encryptionService.decrypt(encryptedPassword);
+
+      // Porównanie hasła
+      if (decryptedPassword == password) {
+        return LoginResult('Login successful', true);
+      } else {
+        return LoginResult('Invalid login or password', false);
+      }
     } else {
       return LoginResult('Invalid login or password', false);
     }
