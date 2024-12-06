@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:project_shop/UI_elements/announcement_view.dart';
 import 'package:project_shop/screens/single_announcement_screen.dart';
+import 'package:project_shop/services/account_firestore.dart';
 import 'package:project_shop/services/announcement_firestore.dart';
 
 class AnnouncementsScreen extends StatefulWidget {
-  AnnouncementsScreen({super.key});
+  final Account? account;
+  AnnouncementsScreen({this.account});
 
   void _navigateToMainPage(BuildContext context, Announcement announcement) {
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => SingleAnnouncementScreen(
               announcement: announcement,
+              userAccount: account,
             )));
   }
 

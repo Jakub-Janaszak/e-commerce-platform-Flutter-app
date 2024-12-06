@@ -51,6 +51,47 @@ class _MyAnnouncementsScreenState extends State<MyAnnouncementsScreen> {
     });
   }
 
+  void _deleteAnnouncement(String announcementId) async {
+    AnnouncementService announcementService = AnnouncementService();
+
+    String? result =
+        await announcementService.deleteAnnouncement(announcementId);
+
+    if (result == null) {
+      print("Announcement deleted successfully!");
+    } else {
+      print("$result");
+    }
+  }
+
+  // Funkcja wyświetlająca okno dialogowe
+  void _showDeleteDialog(BuildContext context, String announcementId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Text('Do you really want to delete this listing?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                // Anulowanie operacji, zamknięcie dialogu
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                _deleteAnnouncement(announcementId);
+                Navigator.of(context).pop();
+              },
+              child: Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -74,30 +115,66 @@ class _MyAnnouncementsScreenState extends State<MyAnnouncementsScreen> {
             filterAnnouncements(value);
           },
         ),
-        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+        backgroundColor: Color.fromARGB(255, 255, 255, 255),
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
             for (int i = 0; i < filteredAnnouncements.length; i += 2)
               Row(children: [
-                GestureDetector(
-                  onTap: () {
-                    widget._navigateToMainPage(
-                        context, filteredAnnouncements[i]);
-                  },
-                  child:
-                      AnnouncementView(announcement: filteredAnnouncements[i]),
+                Stack(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        widget._navigateToMainPage(
+                            context, filteredAnnouncements[i]);
+                      },
+                      child: AnnouncementView(
+                          announcement: filteredAnnouncements[i]),
+                    ),
+                    Positioned(
+                      left: 10,
+                      top: 10,
+                      child: GestureDetector(
+                          onTap: () {
+                            _showDeleteDialog(
+                                context, filteredAnnouncements[i].id);
+                          },
+                          child: Icon(
+                            Icons.delete,
+                            color: Color.fromARGB(125, 255, 0, 0),
+                            size: screenWidth / 8,
+                          )),
+                    ),
+                  ],
                 ),
                 if (i + 1 < filteredAnnouncements.length)
-                  GestureDetector(
-                    onTap: () {
-                      widget._navigateToMainPage(
-                          context, filteredAnnouncements[i + 1]);
-                    },
-                    child: AnnouncementView(
-                        announcement: filteredAnnouncements[i + 1]),
-                  )
+                  Stack(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          widget._navigateToMainPage(
+                              context, filteredAnnouncements[i + 1]);
+                        },
+                        child: AnnouncementView(
+                            announcement: filteredAnnouncements[i + 1]),
+                      ),
+                      Positioned(
+                        left: 10,
+                        top: 10,
+                        child: GestureDetector(
+                            onTap: () {
+                              _showDeleteDialog(
+                                  context, filteredAnnouncements[i + 1].id);
+                            },
+                            child: Icon(
+                              Icons.delete,
+                              color: Color.fromARGB(125, 255, 0, 0),
+                              size: screenWidth / 8,
+                            )),
+                      ),
+                    ],
+                  ),
               ]),
             SizedBox(
               height: screenHeight / 10,

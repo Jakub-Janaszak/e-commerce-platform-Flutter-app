@@ -25,7 +25,7 @@ class _MainPageState extends State<MainPage> {
   void initState() {
     super.initState();
     screens = [
-      AnnouncementsScreen(), //login: widget.login),
+      AnnouncementsScreen(account: widget.account), //login: widget.login),
       CreateAnnouncementScreen(account: widget.account),
       //AnnouncementsScreen(),
       AccountScreen(account: widget.account)

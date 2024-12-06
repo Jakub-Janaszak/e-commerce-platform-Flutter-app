@@ -211,4 +211,45 @@ class AnnouncementService {
       print("Error incrementing views: $e");
     }
   }
+
+  // Delete an announcement
+  Future<String?> deleteAnnouncement(String announcementId) async {
+    try {
+      // Pobieramy dokument ogłoszenia
+      DocumentReference announcementRef = announcements.doc(announcementId);
+
+      // Pobranie danych ogłoszenia, aby usunąć obraz ze Storage, jeśli istnieje
+      DocumentSnapshot documentSnapshot = await announcementRef.get();
+
+      if (documentSnapshot.exists) {
+        Map<String, dynamic> data =
+            documentSnapshot.data() as Map<String, dynamic>;
+
+        // Usuwanie obrazu z Firebase Storage
+        if (data.containsKey('image') &&
+            data['image'] != null &&
+            data['image'].isNotEmpty) {
+          String imageUrl = data['image'];
+
+          // Referencja do pliku w Storage
+          try {
+            final Reference storageRef =
+                FirebaseStorage.instance.refFromURL(imageUrl);
+            await storageRef.delete();
+          } catch (e) {
+            print("Error deleting image from storage: $e");
+          }
+        }
+
+        // Usuwanie dokumentu ogłoszenia z Firestore
+        await announcementRef.delete();
+        return null; // Sukces
+      } else {
+        return 'Announcement not found';
+      }
+    } catch (e) {
+      print("Error deleting announcement: $e");
+      return 'Error deleting announcement';
+    }
+  }
 }
