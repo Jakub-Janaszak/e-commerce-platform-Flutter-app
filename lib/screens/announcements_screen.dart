@@ -8,14 +8,6 @@ class AnnouncementsScreen extends StatefulWidget {
   final Account? account;
   AnnouncementsScreen({this.account});
 
-  void _navigateToMainPage(BuildContext context, Announcement announcement) {
-    Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => SingleAnnouncementScreen(
-              announcement: announcement,
-              userAccount: account,
-            )));
-  }
-
   @override
   State<AnnouncementsScreen> createState() => _AnnouncementsScreenState();
 }
@@ -23,20 +15,30 @@ class AnnouncementsScreen extends StatefulWidget {
 class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
   AnnouncementService announcementService = AnnouncementService();
 
-  late List<Announcement> announcements;
-  late List<Announcement> filteredAnnouncements;
+  late List<Announcement> announcements = [];
+  late List<Announcement> filteredAnnouncements = [];
   TextEditingController searchController = TextEditingController();
+
+  bool isLoading = true;
 
   Future<void> loadAnnouncements() async {
     announcements = await announcementService.getAllAnnouncements();
-    filteredAnnouncements =
-        announcements; // Początkowo wyświetl wszystkie ogłoszenia
-    setState(() {}); // Odświeżenie widoku po załadowaniu danych
+    filteredAnnouncements = announcements;
+    setState(() {
+      isLoading = false; // Ustawienie stanu na zakończenie ładowania
+    });
   }
 
   @override
   void initState() {
     super.initState();
+    loadAnnouncements();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Ponowne ładowanie danych, jeśli ekran jest odświeżany
     loadAnnouncements();
   }
 
@@ -74,35 +76,59 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
         ),
         backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            for (int i = 0; i < filteredAnnouncements.length; i += 2)
-              Row(children: [
-                GestureDetector(
-                  onTap: () {
-                    widget._navigateToMainPage(
-                        context, filteredAnnouncements[i]);
-                  },
-                  child:
-                      AnnouncementView(announcement: filteredAnnouncements[i]),
-                ),
-                if (i + 1 < filteredAnnouncements.length)
-                  GestureDetector(
-                    onTap: () {
-                      widget._navigateToMainPage(
-                          context, filteredAnnouncements[i + 1]);
-                    },
-                    child: AnnouncementView(
-                        announcement: filteredAnnouncements[i + 1]),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator()) // Wyświetl ładowanie
+          : SingleChildScrollView(
+              child: Column(
+                children: [
+                  for (int i = 0; i < filteredAnnouncements.length; i += 2)
+                    Row(children: [
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.of(context)
+                              .push(
+                            MaterialPageRoute(
+                              builder: (context) => SingleAnnouncementScreen(
+                                announcement: filteredAnnouncements[i],
+                                userAccount: widget.account,
+                              ),
+                            ),
+                          )
+                              .then((_) {
+                            // Odśwież dane po powrocie
+                            loadAnnouncements();
+                          });
+                        },
+                        child: AnnouncementView(
+                            announcement: filteredAnnouncements[i]),
+                      ),
+                      if (i + 1 < filteredAnnouncements.length)
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.of(context)
+                                .push(
+                              MaterialPageRoute(
+                                builder: (context) => SingleAnnouncementScreen(
+                                  announcement: filteredAnnouncements[i + 1],
+                                  userAccount: widget.account,
+                                ),
+                              ),
+                            )
+                                .then((_) {
+                              // Odśwież dane po powrocie
+                              loadAnnouncements();
+                            });
+                          },
+                          child: AnnouncementView(
+                              announcement: filteredAnnouncements[i + 1]),
+                        )
+                    ]),
+                  SizedBox(
+                    height: screenHeight / 10,
                   )
-              ]),
-            SizedBox(
-              height: screenHeight / 10,
-            )
-          ],
-        ),
-      ),
+                ],
+              ),
+            ),
     );
   }
 }

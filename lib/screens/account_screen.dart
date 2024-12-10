@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:project_shop/screens/deleted_announcements_screen.dart';
 import 'package:project_shop/screens/my_announcements_screen.dart';
 import 'package:project_shop/screens/single_announcement_screen.dart';
 import 'package:project_shop/services/account_firestore.dart';
@@ -14,6 +15,13 @@ class AccountScreen extends StatelessWidget {
   void _navigateToMyListing(BuildContext context, Account account) {
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => MyAnnouncementsScreen(
+              account: account,
+            )));
+  }
+
+  void _navigateToDeletedListings(BuildContext context, Account account) {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => DeletedAnnouncementsScreen(
               account: account,
             )));
   }
@@ -49,6 +57,18 @@ class AccountScreen extends StatelessWidget {
               },
               child: const Text(
                 'my listings',
+                style: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
+              ),
+              style: TextButton.styleFrom(
+                fixedSize: Size(screenWidth, 50),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                _navigateToDeletedListings(context, account);
+              },
+              child: const Text(
+                'listings deleted by admin',
                 style: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
               ),
               style: TextButton.styleFrom(

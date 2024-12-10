@@ -11,7 +11,9 @@ import 'package:project_shop/services/account_firestore.dart';
 
 class MainPage extends StatefulWidget {
   final Account account;
-  MainPage({required this.account});
+  final bool refreshFlag; // Argument do odświeżenia strony
+
+  MainPage({required this.account, this.refreshFlag = false});
 
   @override
   _MainPageState createState() => _MainPageState();
@@ -25,11 +27,22 @@ class _MainPageState extends State<MainPage> {
   void initState() {
     super.initState();
     screens = [
-      AnnouncementsScreen(account: widget.account), //login: widget.login),
+      AnnouncementsScreen(account: widget.account),
       CreateAnnouncementScreen(account: widget.account),
-      //AnnouncementsScreen(),
       AccountScreen(account: widget.account)
     ];
+  }
+
+  @override
+  void didUpdateWidget(covariant MainPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Jeśli refreshFlag się zmieni, wykonaj odświeżenie
+    if (widget.refreshFlag != oldWidget.refreshFlag) {
+      // Możesz dodać logikę, która odświeży stan, np. zmieni dane w ekranie
+      setState(() {
+        // Może tutaj zmienisz jakąś zmienną lub coś, co wymaga ponownego zbudowania widoku
+      });
+    }
   }
 
   @override
@@ -37,7 +50,6 @@ class _MainPageState extends State<MainPage> {
     final itemsNavicationBar = <Widget>[
       const Icon(Icons.home, size: 30),
       const Icon(Icons.add, size: 30),
-      //const Icon(Icons.favorite, size: 30),
       const Icon(Icons.person, size: 30)
     ];
 

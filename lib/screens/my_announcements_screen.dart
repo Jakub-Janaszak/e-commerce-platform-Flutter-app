@@ -10,13 +10,6 @@ class MyAnnouncementsScreen extends StatefulWidget {
   final Account account;
   MyAnnouncementsScreen({required this.account});
 
-  void _navigateToMainPage(BuildContext context, Announcement announcement) {
-    Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => EditAnnouncementScreen(
-              announcement: announcement,
-            )));
-  }
-
   @override
   State<MyAnnouncementsScreen> createState() => _MyAnnouncementsScreenState();
 }
@@ -51,7 +44,7 @@ class _MyAnnouncementsScreenState extends State<MyAnnouncementsScreen> {
     });
   }
 
-  void _deleteAnnouncement(String announcementId) async {
+  Future<void> _deleteAnnouncement(String announcementId) async {
     AnnouncementService announcementService = AnnouncementService();
 
     String? result =
@@ -80,8 +73,9 @@ class _MyAnnouncementsScreenState extends State<MyAnnouncementsScreen> {
               child: Text('Cancel'),
             ),
             TextButton(
-              onPressed: () {
-                _deleteAnnouncement(announcementId);
+              onPressed: () async {
+                await _deleteAnnouncement(announcementId);
+                loadAnnouncements();
                 Navigator.of(context).pop();
               },
               child: Text('Delete'),
@@ -121,43 +115,23 @@ class _MyAnnouncementsScreenState extends State<MyAnnouncementsScreen> {
         child: Column(
           children: [
             for (int i = 0; i < filteredAnnouncements.length; i += 2)
-              Row(children: [
-                Stack(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        widget._navigateToMainPage(
-                            context, filteredAnnouncements[i]);
-                      },
-                      child: AnnouncementView(
-                          announcement: filteredAnnouncements[i]),
-                    ),
-                    Positioned(
-                      left: 10,
-                      top: 10,
-                      child: GestureDetector(
-                          onTap: () {
-                            _showDeleteDialog(
-                                context, filteredAnnouncements[i].id);
-                          },
-                          child: Icon(
-                            Icons.delete,
-                            color: Color.fromARGB(125, 255, 0, 0),
-                            size: screenWidth / 8,
-                          )),
-                    ),
-                  ],
-                ),
-                if (i + 1 < filteredAnnouncements.length)
+              Row(
+                children: [
                   Stack(
                     children: [
                       GestureDetector(
                         onTap: () {
-                          widget._navigateToMainPage(
-                              context, filteredAnnouncements[i + 1]);
+                          Navigator.of(context)
+                              .push(MaterialPageRoute(
+                                  builder: (context) => EditAnnouncementScreen(
+                                        announcement: filteredAnnouncements[i],
+                                      )))
+                              .then((_) {
+                            loadAnnouncements();
+                          });
                         },
                         child: AnnouncementView(
-                            announcement: filteredAnnouncements[i + 1]),
+                            announcement: filteredAnnouncements[i]),
                       ),
                       Positioned(
                         left: 10,
@@ -165,7 +139,7 @@ class _MyAnnouncementsScreenState extends State<MyAnnouncementsScreen> {
                         child: GestureDetector(
                             onTap: () {
                               _showDeleteDialog(
-                                  context, filteredAnnouncements[i + 1].id);
+                                  context, filteredAnnouncements[i].id);
                             },
                             child: Icon(
                               Icons.delete,
@@ -175,10 +149,46 @@ class _MyAnnouncementsScreenState extends State<MyAnnouncementsScreen> {
                       ),
                     ],
                   ),
-              ]),
+                  if (i + 1 < filteredAnnouncements.length)
+                    Stack(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.of(context)
+                                .push(MaterialPageRoute(
+                                    builder: (context) =>
+                                        EditAnnouncementScreen(
+                                          announcement:
+                                              filteredAnnouncements[i + 1],
+                                        )))
+                                .then((_) {
+                              loadAnnouncements();
+                            });
+                          },
+                          child: AnnouncementView(
+                              announcement: filteredAnnouncements[i + 1]),
+                        ),
+                        Positioned(
+                          left: 10,
+                          top: 10,
+                          child: GestureDetector(
+                              onTap: () {
+                                _showDeleteDialog(
+                                    context, filteredAnnouncements[i + 1].id);
+                              },
+                              child: Icon(
+                                Icons.delete,
+                                color: Color.fromARGB(125, 255, 0, 0),
+                                size: screenWidth / 8,
+                              )),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
             SizedBox(
               height: screenHeight / 10,
-            )
+            ),
           ],
         ),
       ),

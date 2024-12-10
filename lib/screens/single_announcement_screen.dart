@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:project_shop/UI_elements/announcement_view.dart';
+import 'package:project_shop/screens/admin_delete_announcement_screen.dart';
 import 'package:project_shop/screens/seller_account_screen.dart';
 import 'package:project_shop/services/account_firestore.dart';
 import 'package:project_shop/services/announcement_firestore.dart';
@@ -27,11 +28,21 @@ class SingleAnnouncementScreen extends StatefulWidget {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('To jest powiadomienie!'),
-          duration: Duration(seconds: 2), // Czas trwania powiadomienia
+          content: Text('Konto zostało usunięte.'),
+          duration: Duration(seconds: 2),
         ),
       );
     }
+  }
+
+  void _navigateToAdminDeleteAnnouncementScreen(BuildContext context,
+      Announcement announcement, Account userAccount, Account sellerAccount) {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => AdminDeleteAnnouncementScreen(
+              announcement: announcement,
+              userAccout: userAccount,
+              sellerAccout: sellerAccount,
+            )));
   }
 }
 
@@ -98,7 +109,14 @@ class _SingleAnnouncementScreenState extends State<SingleAnnouncementScreen> {
                             right: 4,
                             bottom: 4,
                             child: GestureDetector(
-                                onTap: () {},
+                                onTap: () {
+                                  widget
+                                      ._navigateToAdminDeleteAnnouncementScreen(
+                                          context,
+                                          announcement,
+                                          widget.userAccount!,
+                                          sellerAccount!);
+                                },
                                 child: Icon(
                                   Icons.delete,
                                   color: Color.fromARGB(125, 255, 0, 0),
