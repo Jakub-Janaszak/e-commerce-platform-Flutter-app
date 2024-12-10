@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:project_shop/UI_elements/announcement_view.dart';
+import 'package:project_shop/models/categories.dart';
 import 'package:project_shop/services/announcement_firestore.dart';
 
 TextEditingController titleController = TextEditingController();
 TextEditingController prizeController = TextEditingController();
 TextEditingController locationController = TextEditingController();
 TextEditingController descriptionController = TextEditingController();
+String selectedCategory = categories.first;
 
 AnnouncementService announcementService = AnnouncementService();
 bool isImageReady = false;
@@ -43,6 +45,7 @@ class _EditAnnouncementScreenState extends State<EditAnnouncementScreen> {
         TextEditingController(text: widget.announcement.location);
     descriptionController =
         TextEditingController(text: widget.announcement.description);
+    selectedCategory = widget.announcement.category;
     _updatedAnnouncement = _fetchUpdatedAnnouncement();
   }
 
@@ -66,6 +69,7 @@ class _EditAnnouncementScreenState extends State<EditAnnouncementScreen> {
       prize: double.tryParse(prizeController.text) ?? 0.0,
       location: locationController.text,
       description: descriptionController.text,
+      category: selectedCategory,
     );
 
     if (result != null) {
@@ -217,6 +221,22 @@ class _EditAnnouncementScreenState extends State<EditAnnouncementScreen> {
                                   10.0), // Wielkość wewnętrznego odstępu
                         ),
                       ),
+                    ),
+                    SizedBox(height: screenHeight / 50),
+                    DropdownButton<String>(
+                      value: selectedCategory,
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          selectedCategory = newValue!;
+                        });
+                      },
+                      items: categories
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
                     ),
                     SizedBox(
                       height: screenHeight / 30,

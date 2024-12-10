@@ -18,6 +18,7 @@ class Announcement {
   final Timestamp timestamp;
   final String owner;
   final int views;
+  final String category;
 
   Announcement({
     required this.id,
@@ -29,6 +30,7 @@ class Announcement {
     required this.timestamp,
     required this.owner,
     required this.views,
+    required this.category,
   });
 
   // Factory method - mapowanie z Firestore do obiektu Announcement
@@ -44,6 +46,7 @@ class Announcement {
       timestamp: data['timestamp'] ?? Timestamp.now(),
       owner: data['owner'] ?? '',
       views: data['views'] ?? 0,
+      category: data['category'] ?? 'Uncategorized',
     );
   }
 
@@ -58,6 +61,7 @@ class Announcement {
       'owner': owner,
       'timestamp': timestamp,
       'views': views,
+      'category': category,
     };
   }
 }
@@ -93,7 +97,7 @@ class AnnouncementService {
 
   //Create
   Future<String?> addAnnouncement(String title, double prize, String location,
-      String description, Account account) async {
+      String description, String category, Account account) async {
     if (title.isEmpty ||
         prize == null ||
         location.isEmpty ||
@@ -112,6 +116,7 @@ class AnnouncementService {
       timestamp: Timestamp.now(),
       owner: account.id,
       views: 0,
+      category: category,
     );
 
     // Zapisujemy do Firestore używając mapy z metody toMap
@@ -126,6 +131,7 @@ class AnnouncementService {
     double? prize,
     String? location,
     String? description,
+    String? category,
   }) async {
     try {
       Map<String, dynamic> updates = {};
@@ -142,11 +148,13 @@ class AnnouncementService {
       if (updates.isEmpty) {
         return 'No updates provided';
       }
+      if (category != null && category.isNotEmpty)
+        updates['category'] = category;
 
       // Aktualizacja ogłoszenia w Firestore
       await announcements.doc(announcementId).update(updates);
 
-      return null; // Sukces, brak błędu
+      return null; //sukces
     } catch (e) {
       print("Error updating announcement: $e");
       return 'Error updating announcement';
@@ -250,6 +258,21 @@ class AnnouncementService {
     } catch (e) {
       print("Error deleting announcement: $e");
       return 'Error deleting announcement';
+    }
+  }
+
+  //Filtrowanie po kaategorii
+  Future<List<Announcement>> getAnnouncementsByCategory(String category) async {
+    try {
+      QuerySnapshot querySnapshot =
+          await announcements.where('category', isEqualTo: category).get();
+
+      return querySnapshot.docs
+          .map((doc) => Announcement.fromFirestore(doc))
+          .toList();
+    } catch (e) {
+      print("Error fetching announcements by category: $e");
+      return [];
     }
   }
 }

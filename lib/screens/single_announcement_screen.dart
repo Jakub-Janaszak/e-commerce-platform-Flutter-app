@@ -206,6 +206,14 @@ class _SingleAnnouncementScreenState extends State<SingleAnnouncementScreen> {
                         fontSize: 20,
                       ),
                     ),
+                    Text(
+                      "category: ${announcement.category}",
+                      textAlign: TextAlign.left,
+                      style: GoogleFonts.lato(
+                        color: Color.fromARGB(255, 59, 59, 59),
+                        fontSize: 12,
+                      ),
+                    ),
                     SizedBox(
                       height: 200,
                     ),

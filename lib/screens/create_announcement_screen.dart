@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:project_shop/models/categories.dart';
 import 'package:project_shop/screens/login_screen.dart';
 import 'package:project_shop/services/announcement_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -12,10 +13,12 @@ TextEditingController titleController = TextEditingController();
 TextEditingController prizeController = TextEditingController();
 TextEditingController locationController = TextEditingController();
 TextEditingController descriptionController = TextEditingController();
+String selectedCategory = categories.first;
 
 AnnouncementService announcementService = AnnouncementService();
 
 bool isImageReady = false;
+
 
 void _addImage() async {
   isImageReady = false;
@@ -39,9 +42,9 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
   String message = '';
 
   void _makeAnnouncement(String title, double prize, String location,
-      String description, Account account) {
+      String description, String category, Account account) {
     announcementService
-        .addAnnouncement(title, prize, location, description, account)
+        .addAnnouncement(title, prize, location, description, category, account)
         .then((result) {
       setState(() {
         if (result != null) {
@@ -144,6 +147,21 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
                 ),
               ),
             ),
+            SizedBox(height: screenHeight / 50),
+            DropdownButton<String>(
+              value: selectedCategory,
+              onChanged: (String? newValue) {
+                setState(() {
+                  selectedCategory = newValue!;
+                });
+              },
+              items: categories.map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
             SizedBox(
               height: screenHeight / 30,
             ),
@@ -167,6 +185,7 @@ class _CreateAnnouncementScreenState extends State<CreateAnnouncementScreen> {
                             prize,
                             locationController.text,
                             descriptionController.text,
+                            selectedCategory,
                             widget.account);
                       },
                       icon: Icon(

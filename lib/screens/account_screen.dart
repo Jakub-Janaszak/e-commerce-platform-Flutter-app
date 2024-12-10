@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:project_shop/screens/deleted_announcements_screen.dart';
+import 'package:project_shop/screens/login_screen.dart';
 import 'package:project_shop/screens/my_announcements_screen.dart';
 import 'package:project_shop/screens/single_announcement_screen.dart';
 import 'package:project_shop/services/account_firestore.dart';
@@ -24,6 +25,13 @@ class AccountScreen extends StatelessWidget {
         builder: (context) => DeletedAnnouncementsScreen(
               account: account,
             )));
+  }
+
+  void _navigateToLoginScreen(BuildContext context) {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => LoginScreen()),
+      (Route<dynamic> route) => false, // Usuwa wszystkie poprzednie trasy
+    );
   }
 
   @override
@@ -51,6 +59,9 @@ class AccountScreen extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
+            SizedBox(
+              height: screenHeight / 24,
+            ),
             TextButton(
               onPressed: () {
                 _navigateToMyListing(context, account);
@@ -75,8 +86,20 @@ class AccountScreen extends StatelessWidget {
                 fixedSize: Size(screenWidth, 50),
               ),
             ),
+            TextButton(
+              onPressed: () {
+                _navigateToLoginScreen(context);
+              },
+              child: const Text(
+                'log out',
+                style: TextStyle(color: Color.fromARGB(255, 255, 0, 0)),
+              ),
+              style: TextButton.styleFrom(
+                fixedSize: Size(screenWidth, 50),
+              ),
+            ),
             SizedBox(
-              height: screenHeight / 3,
+              height: screenHeight / 6,
             )
           ],
         ),
