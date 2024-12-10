@@ -52,14 +52,14 @@ class LoginResult {
 
 class AdminDeletedAnnouncementsService {
   // Kolekcja
-  final CollectionReference removedAnnouncements =
+  final CollectionReference deletedAnnouncements =
       FirebaseFirestore.instance.collection('admin_removed_announcements');
 
   // Dodawanie usunięte ogłoszenie
   Future<String?> addAdminDeletedAnnouncement(String removerId, String ownerId,
       String announcementTitle, String reason) async {
     // Generowanie unikalnego ID
-    String id = removedAnnouncements.doc().id;
+    String id = deletedAnnouncements.doc().id;
 
     // Dodanie nowe ogłoszenie
     AdminDeletedAnnouncement newRemovedAnnouncement = AdminDeletedAnnouncement(
@@ -71,7 +71,27 @@ class AdminDeletedAnnouncementsService {
       timestamp: Timestamp.now(),
     );
 
-    await removedAnnouncements.doc(id).set(newRemovedAnnouncement.toMap());
+    await deletedAnnouncements.doc(id).set(newRemovedAnnouncement.toMap());
     return null;
+  }
+
+  //Pobierz wszystkie usuniete ogłoszenia dla użytkownika o danym id
+  Future<List<AdminDeletedAnnouncement>> getAllAnnouncementsByOwnerId(
+      String ownerId) async {
+    try {
+      QuerySnapshot querySnapshot = await deletedAnnouncements
+          .where('ownerId', isEqualTo: ownerId)
+          .orderBy('timestamp',
+              descending:
+                  true) //firebase musiało zrobić indekksy, żeby szybciej działało to zapytanie z sortowaniem i filtrowaniem
+          .get();
+
+      return querySnapshot.docs
+          .map((doc) => AdminDeletedAnnouncement.fromFirestore(doc))
+          .toList();
+    } catch (e) {
+      print("Error fetching deleted announcements by owner ID: $e");
+      return [];
+    }
   }
 }

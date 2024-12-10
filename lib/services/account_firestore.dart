@@ -159,4 +159,17 @@ class AccountService {
       return null;
     }
   }
+
+  // Usuwanie konta po ID
+  Future<bool> deleteAccount(String accountId) async {
+    try {
+      // Usunięcie dokumentu konta z kolekcji
+      await accounts.doc(accountId).delete();
+      print('Account $accountId deleted successfully');
+      return true;
+    } catch (e) {
+      print('Error deleting account: $e');
+      return false;
+    }
+  }
 }

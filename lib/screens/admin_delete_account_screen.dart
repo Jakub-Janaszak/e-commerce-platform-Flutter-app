@@ -7,44 +7,42 @@ import 'package:project_shop/services/account_firestore.dart';
 import 'package:project_shop/services/admin_deleted_announcement_firestore.dart';
 import 'package:project_shop/services/announcement_firestore.dart';
 
-class AdminDeleteAnnouncementScreen extends StatefulWidget {
-  final Announcement announcement;
+class AdminDeleteAccountScreen extends StatefulWidget {
   final Account userAccout;
   final Account sellerAccout;
-  AdminDeleteAnnouncementScreen(
-      {required this.announcement,
-      required this.userAccout,
-      required this.sellerAccout});
+  AdminDeleteAccountScreen(
+      {required this.userAccout, required this.sellerAccout});
 
-  AdminDeletedAnnouncementsService adminDeletedAnnouncementsService =
-      AdminDeletedAnnouncementsService();
+  AccountService accountService = AccountService();
   AnnouncementService announcementService = AnnouncementService();
 
   @override
-  State<AdminDeleteAnnouncementScreen> createState() =>
-      _AdminDeleteAnnouncementScreenState();
+  State<AdminDeleteAccountScreen> createState() =>
+      _AdminDeleteAccountScreenState();
 
   void _navigateToLoginScreen(BuildContext context) {
     Navigator.of(context)
         .pop(MaterialPageRoute(builder: (context) => LoginScreen()));
   }
 
-  void _deleteAnnouncement(BuildContext context, Account userAccount,
-      Account sellerAccount, Announcement announcement, String reason) {
-    adminDeletedAnnouncementsService
-        .addAdminDeletedAnnouncement(
-            userAccount.id, sellerAccount.id, announcement.title, reason)
-        .then((result) async {
+  void _deleteAccount(
+      BuildContext context, Account userAccount, Account sellerAccount) async {
+    List<Announcement> sellersAnnouncements = [];
+    String info;
+    sellersAnnouncements = await announcementService
+        .getAllAnnouncementsByOwnerId(sellerAccount.id);
+    for (Announcement announcement in sellersAnnouncements) {
       await announcementService.deleteAnnouncement(announcement.id);
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-            builder: (context) => MainPage(
-                  account: userAccount,
-                  refreshFlag: true,
-                )),
-        (Route<dynamic> route) => false, // Usuwa wszystkie poprzednie trasy
-      );
-    });
+    }
+    await accountService.deleteAccount(sellerAccount.id);
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+          builder: (context) => MainPage(
+                account: userAccount,
+                refreshFlag: true,
+              )),
+      (Route<dynamic> route) => false, // Usuwa wszystkie poprzednie trasy
+    );
   }
 
   void _goBack(BuildContext context) {
@@ -52,8 +50,7 @@ class AdminDeleteAnnouncementScreen extends StatefulWidget {
   }
 }
 
-class _AdminDeleteAnnouncementScreenState
-    extends State<AdminDeleteAnnouncementScreen> {
+class _AdminDeleteAccountScreenState extends State<AdminDeleteAccountScreen> {
   TextEditingController reasonController = TextEditingController();
   String message = '';
 
@@ -79,31 +76,14 @@ class _AdminDeleteAnnouncementScreenState
         Center(
             child: Column(mainAxisSize: MainAxisSize.min, children: [
           Text(
-            'Reason for deletion',
+            'Do you realy want to delete this account?',
             style: GoogleFonts.lato(
               color: Color.fromARGB(255, 0, 0, 0),
               fontSize: 24,
             ),
+            textAlign: TextAlign.center,
           ),
-          SizedBox(height: screenHeight / 20),
-          Container(
-            width: screenWidth / 1.5,
-            decoration: BoxDecoration(
-              color: Color.fromARGB(255, 137, 137, 137)
-                  .withOpacity(0.5), // Kolor przezroczysty
-              borderRadius: BorderRadius.circular(10.0), // Zaokrąglenie
-            ),
-            child: TextField(
-              controller: reasonController,
-              decoration: const InputDecoration(
-                hintText: 'reason...',
-                border: InputBorder.none, // Usuwa domyślną obwódkę
-                contentPadding: EdgeInsets.symmetric(
-                    horizontal: 10.0), // Wielkość wewnętrznego odstępu
-              ),
-            ),
-          ),
-          SizedBox(height: screenHeight / 50),
+          SizedBox(height: screenHeight / 40),
           Container(
             width: screenWidth / 1.5,
             decoration: BoxDecoration(
@@ -125,12 +105,8 @@ class _AdminDeleteAnnouncementScreenState
                 SizedBox(width: screenWidth / 8),
                 TextButton(
                   onPressed: () {
-                    widget._deleteAnnouncement(
-                        context,
-                        widget.userAccout,
-                        widget.sellerAccout,
-                        widget.announcement,
-                        reasonController.text);
+                    widget._deleteAccount(
+                        context, widget.userAccout, widget.sellerAccout);
                   },
                   child: const Text(
                     'Delete',

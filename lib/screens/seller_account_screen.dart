@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:project_shop/UI_elements/announcement_view.dart';
+import 'package:project_shop/screens/admin_delete_account_screen.dart';
 import 'package:project_shop/screens/announcements_screen.dart';
 import 'package:project_shop/screens/edit_announcement_screen.dart';
 import 'package:project_shop/screens/single_announcement_screen.dart';
@@ -17,6 +18,15 @@ class SellerAccountScreen extends StatefulWidget {
         builder: (context) => SingleAnnouncementScreen(
               announcement: announcement,
               userAccount: userAccount,
+            )));
+  }
+
+  void _navigateToAdminDeleteAccountScreen(
+      BuildContext context, Account userAccount, Account sellerAccount) {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => AdminDeleteAccountScreen(
+              userAccout: userAccount,
+              sellerAccout: sellerAccount,
             )));
   }
 
@@ -91,7 +101,19 @@ class _SellerAccountScreenState extends State<SellerAccountScreen> {
               Text(
                 widget.sellerAccount.login,
                 style: GoogleFonts.lato(fontSize: 24),
-              )
+              ),
+              if (widget.userAccount?.login != null &&
+                  widget.userAccount?.login == "admin")
+                GestureDetector(
+                    onTap: () {
+                      widget._navigateToAdminDeleteAccountScreen(
+                          context, widget.userAccount!, widget.sellerAccount!);
+                    },
+                    child: Icon(
+                      Icons.delete,
+                      color: Color.fromARGB(125, 255, 0, 0),
+                      size: screenWidth / 10,
+                    )),
             ],
           ),
           SingleChildScrollView(
