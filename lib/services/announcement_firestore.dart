@@ -19,6 +19,7 @@ class Announcement {
   final String owner;
   final int views;
   final String category;
+  final bool reserved;
 
   Announcement({
     required this.id,
@@ -31,6 +32,7 @@ class Announcement {
     required this.owner,
     required this.views,
     required this.category,
+    required this.reserved,
   });
 
   // Factory method - mapowanie z Firestore do obiektu Announcement
@@ -47,6 +49,7 @@ class Announcement {
       owner: data['owner'] ?? '',
       views: data['views'] ?? 0,
       category: data['category'] ?? 'Uncategorized',
+      reserved: data['reserved'] ?? false,
     );
   }
 
@@ -62,6 +65,7 @@ class Announcement {
       'timestamp': timestamp,
       'views': views,
       'category': category,
+      'reserved': reserved,
     };
   }
 }
@@ -117,6 +121,7 @@ class AnnouncementService {
       owner: account.id,
       views: 0,
       category: category,
+      reserved: false,
     );
 
     // Zapisujemy do Firestore używając mapy z metody toMap
@@ -132,6 +137,7 @@ class AnnouncementService {
     String? location,
     String? description,
     String? category,
+    bool? reserved,
   }) async {
     try {
       Map<String, dynamic> updates = {};
@@ -151,6 +157,8 @@ class AnnouncementService {
       if (category != null && category.isNotEmpty)
         updates['category'] = category;
 
+      if (reserved != null) updates['reserved'] = reserved;
+
       // Aktualizacja ogłoszenia w Firestore
       await announcements.doc(announcementId).update(updates);
 
@@ -163,7 +171,9 @@ class AnnouncementService {
 
   // Get all announcements
   Future<List<Announcement>> getAllAnnouncements() async {
-    QuerySnapshot querySnapshot = await announcements.get();
+    QuerySnapshot querySnapshot =
+        await announcements.orderBy('timestamp', descending: true).get();
+
     return querySnapshot.docs
         .map((doc) => Announcement.fromFirestore(doc))
         .toList();

@@ -70,83 +70,78 @@ class _SellerAccountScreenState extends State<SellerAccountScreen> {
     double screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      appBar: AppBar(
-        title: TextField(
-          controller: searchController,
-          decoration: InputDecoration(
-            hintText: 'Search...',
-            prefixIcon: Icon(Icons.search),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(20.0),
-              borderSide: BorderSide.none,
+        appBar: AppBar(
+          title: TextField(
+            controller: searchController,
+            decoration: InputDecoration(
+              hintText: 'Search...',
+              prefixIcon: Icon(Icons.search),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20.0),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: Colors.white,
             ),
-            filled: true,
-            fillColor: Colors.white,
+            onChanged: (value) {
+              filterAnnouncements(value);
+            },
           ),
-          onChanged: (value) {
-            filterAnnouncements(value);
-          },
+          backgroundColor: Color.fromARGB(255, 255, 255, 255),
         ),
-        backgroundColor: Color.fromARGB(255, 255, 255, 255),
-      ),
-      body: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+        body: SingleChildScrollView(
+          child: Column(
             children: [
-              Icon(
-                Icons.account_circle_rounded,
-                size: screenWidth / 8,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.account_circle_rounded,
+                    size: screenWidth / 8,
+                  ),
+                  Text(
+                    widget.sellerAccount.login,
+                    style: GoogleFonts.lato(fontSize: 24),
+                  ),
+                  if (widget.userAccount?.login != null &&
+                      widget.userAccount?.login == "admin")
+                    GestureDetector(
+                        onTap: () {
+                          widget._navigateToAdminDeleteAccountScreen(context,
+                              widget.userAccount!, widget.sellerAccount!);
+                        },
+                        child: Icon(
+                          Icons.delete,
+                          color: Color.fromARGB(125, 255, 0, 0),
+                          size: screenWidth / 10,
+                        )),
+                ],
               ),
-              Text(
-                widget.sellerAccount.login,
-                style: GoogleFonts.lato(fontSize: 24),
-              ),
-              if (widget.userAccount?.login != null &&
-                  widget.userAccount?.login == "admin")
-                GestureDetector(
+              for (int i = 0; i < filteredAnnouncements.length; i += 2)
+                Row(children: [
+                  GestureDetector(
                     onTap: () {
-                      widget._navigateToAdminDeleteAccountScreen(
-                          context, widget.userAccount!, widget.sellerAccount!);
+                      widget._navigateToMainPage(
+                          context, filteredAnnouncements[i]);
                     },
-                    child: Icon(
-                      Icons.delete,
-                      color: Color.fromARGB(125, 255, 0, 0),
-                      size: screenWidth / 10,
-                    )),
-            ],
-          ),
-          SingleChildScrollView(
-            child: Column(
-              children: [
-                for (int i = 0; i < filteredAnnouncements.length; i += 2)
-                  Row(children: [
+                    child: AnnouncementView(
+                        announcement: filteredAnnouncements[i]),
+                  ),
+                  if (i + 1 < filteredAnnouncements.length)
                     GestureDetector(
                       onTap: () {
                         widget._navigateToMainPage(
-                            context, filteredAnnouncements[i]);
+                            context, filteredAnnouncements[i + 1]);
                       },
                       child: AnnouncementView(
-                          announcement: filteredAnnouncements[i]),
+                          announcement: filteredAnnouncements[i + 1]),
                     ),
-                    if (i + 1 < filteredAnnouncements.length)
-                      GestureDetector(
-                        onTap: () {
-                          widget._navigateToMainPage(
-                              context, filteredAnnouncements[i + 1]);
-                        },
-                        child: AnnouncementView(
-                            announcement: filteredAnnouncements[i + 1]),
-                      ),
-                  ]),
-                SizedBox(
-                  height: screenHeight / 10,
-                )
-              ],
-            ),
+                ]),
+              SizedBox(
+                height: screenHeight / 10,
+              )
+            ],
           ),
-        ],
-      ),
-    );
+        ));
   }
 }

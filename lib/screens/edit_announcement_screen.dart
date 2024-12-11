@@ -10,6 +10,7 @@ TextEditingController prizeController = TextEditingController();
 TextEditingController locationController = TextEditingController();
 TextEditingController descriptionController = TextEditingController();
 String selectedCategory = categories.first;
+bool _isReserved = false;
 
 AnnouncementService announcementService = AnnouncementService();
 bool isImageReady = false;
@@ -46,6 +47,7 @@ class _EditAnnouncementScreenState extends State<EditAnnouncementScreen> {
     descriptionController =
         TextEditingController(text: widget.announcement.description);
     selectedCategory = widget.announcement.category;
+    _isReserved = widget.announcement.reserved;
     _updatedAnnouncement = _fetchUpdatedAnnouncement();
   }
 
@@ -70,6 +72,7 @@ class _EditAnnouncementScreenState extends State<EditAnnouncementScreen> {
       location: locationController.text,
       description: descriptionController.text,
       category: selectedCategory,
+      reserved: _isReserved,
     );
 
     if (result != null) {
@@ -237,6 +240,22 @@ class _EditAnnouncementScreenState extends State<EditAnnouncementScreen> {
                           child: Text(value),
                         );
                       }).toList(),
+                    ),
+                    SizedBox(height: screenHeight / 50),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("Reserved: "),
+                        Checkbox(
+                          value: _isReserved, // stan checkboxa
+                          onChanged: (bool? value) {
+                            setState(() {
+                              _isReserved =
+                                  value ?? false; // zmiana stanu checkboxa
+                            });
+                          },
+                        ),
+                      ],
                     ),
                     SizedBox(
                       height: screenHeight / 30,

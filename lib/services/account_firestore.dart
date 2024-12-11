@@ -1,11 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:project_shop/services/encryption_service';
+import 'package:project_shop/services/encryption_service.dart';
 
 class Account {
   final String id;
   final String login;
   final String email;
   final String password;
+  final String phoneNumber;
   final Timestamp timestamp;
 
   Account({
@@ -13,6 +14,7 @@ class Account {
     required this.login,
     required this.email,
     required this.password,
+    required this.phoneNumber,
     required this.timestamp,
   });
 
@@ -24,6 +26,7 @@ class Account {
       login: data['login'] ?? '',
       email: data['email'] ?? '',
       password: data['password'] ?? '',
+      phoneNumber: data['phoneNumber'] ?? '',
       timestamp: data['timestamp'] ?? Timestamp.now(),
     );
   }
@@ -34,6 +37,7 @@ class Account {
       'login': login,
       'email': email,
       'password': password,
+      'phoneNumber': phoneNumber,
       'timestamp': timestamp,
     };
   }
@@ -56,7 +60,7 @@ class AccountService {
 
   // Dodawanie konta
   Future<String?> addAccount(
-      String login, String email, String password) async {
+      String login, String email, String password, String phoneNumber) async {
     if (login.isEmpty || email.isEmpty || password.isEmpty) {
       return 'Enter all data.';
     }
@@ -75,6 +79,13 @@ class AccountService {
       return 'Email already exists';
     }
 
+    // Sprawdzenie istnienia numeru telefonu
+    QuerySnapshot phoneSnapshot =
+        await accounts.where('phoneNumber', isEqualTo: phoneNumber).get();
+    if (phoneSnapshot.docs.isNotEmpty) {
+      return 'Phone number already exists';
+    }
+
     // Generowanie unikalnego ID
     String id = accounts.doc().id;
 
@@ -88,6 +99,7 @@ class AccountService {
       login: login,
       email: email,
       password: encryptedPassword,
+      phoneNumber: phoneNumber,
       timestamp: Timestamp.now(),
     );
 

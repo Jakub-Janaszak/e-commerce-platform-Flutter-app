@@ -9,8 +9,6 @@ void _navigateToLoginScreen(BuildContext context) {
       .pop(MaterialPageRoute(builder: (context) => LoginScreen()));
 }
 
-
-
 class RegisterScreen extends StatefulWidget {
   RegisterScreen({super.key});
 
@@ -23,10 +21,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController loginController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController emailController = TextEditingController();
+  TextEditingController phoneNumberController = TextEditingController();
   String message = '';
 
-  void registerAccount(String login, String email, String password) {
-    AccountService().addAccount(login, email, password).then((result) {
+  void registerAccount(
+      String login, String email, String password, String phoneNumber) {
+    AccountService()
+        .addAccount(login, email, password, phoneNumber)
+        .then((result) {
       setState(() {
         if (result != null) {
           message = result;
@@ -103,6 +105,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   borderRadius: BorderRadius.circular(10.0), // Zaokrąglenie
                 ),
                 child: TextField(
+                  controller: passwordController,
+                  decoration: const InputDecoration(
+                    hintText: 'Password',
+                    border: InputBorder.none, // Usuwa domyślną obwódkę
+                    contentPadding: EdgeInsets.symmetric(
+                        horizontal: 10.0), // Wielkość wewnętrznego odstępu
+                  ),
+                  obscureText: true,
+                ),
+              ),
+              SizedBox(height: screenHeight / 50),
+              Container(
+                width: screenWidth / 1.5,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.5), // Kolor przezroczysty
+                  borderRadius: BorderRadius.circular(10.0), // Zaokrąglenie
+                ),
+                child: TextField(
                   controller: emailController,
                   decoration: const InputDecoration(
                     hintText: 'E-mail',
@@ -120,14 +140,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   borderRadius: BorderRadius.circular(10.0), // Zaokrąglenie
                 ),
                 child: TextField(
-                  controller: passwordController,
+                  controller: phoneNumberController,
+                  keyboardType: TextInputType.phone,
                   decoration: const InputDecoration(
-                    hintText: 'Password',
+                    hintText: 'Phone number',
                     border: InputBorder.none, // Usuwa domyślną obwódkę
                     contentPadding: EdgeInsets.symmetric(
                         horizontal: 10.0), // Wielkość wewnętrznego odstępu
                   ),
-                  obscureText: true,
                 ),
               ),
               SizedBox(height: screenHeight / 50),
@@ -139,13 +159,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 child: TextButton(
                   onPressed: () {
-                    // Dodaj tutaj logikę dla przycisku
                     print("l: " +
                         loginController.text +
                         "   p: " +
                         passwordController.text);
                     registerAccount(loginController.text, emailController.text,
-                        passwordController.text);
+                        passwordController.text, phoneNumberController.text);
                   },
                   child: const Text(
                     'Create account',

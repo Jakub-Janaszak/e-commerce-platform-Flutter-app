@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:project_shop/services/encryption_service';
 
 class AdminDeletedAnnouncement {
   final String id;
